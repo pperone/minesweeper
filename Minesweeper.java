@@ -1,46 +1,41 @@
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.Timer;
+import java.io.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.swing.*;
 
 
 public class Minesweeper extends JFrame {
+
+    /*
+     * Pedro Perone
+     * 999992958
+     * MCIS5103_029192S: Advanced Programming Concepts
+     */
+    public static class Globals {
+      public static int cols;
+      public static int rows;
+      public static int width;
+      public static int height;
+      public static int mines;
+    }
 
     private static final long serialVersionUID = 1L;
     private JLabel statusbar;
 
     private class Board extends JPanel {
 
-      private final int NUM_IMAGES = 13;
-      private final int CELL_SIZE = 15;
-    
-      private final int COVER_FOR_CELL = 10;
-      private final int MARK_FOR_CELL = 10;
-      private final int EMPTY_CELL = 0;
-      private final int MINE_CELL = 9;
-      private final int COVERED_MINE_CELL = MINE_CELL + COVER_FOR_CELL;
-      private final int MARKED_MINE_CELL = COVERED_MINE_CELL + MARK_FOR_CELL;
-    
-      private final int DRAW_MINE = 9;
-      private final int DRAW_COVER = 10;
-      private final int DRAW_MARK = 11;
-      private final int DRAW_WRONG_MARK = 12;
-    
-      private final int N_MINES = 40;
-      private final int N_ROWS = 16;
-      private final int N_COLS = 16;
-    
-      private final int BOARD_WIDTH = N_COLS * CELL_SIZE + 1;
-      private final int BOARD_HEIGHT = N_ROWS * CELL_SIZE + 1;
+      private static final long serialVersionUID = 1L;
     
       private int[] field;
       private boolean inGame;
@@ -51,365 +46,430 @@ public class Minesweeper extends JFrame {
       private final JLabel statusbar;
     
       public Board(JLabel statusbar) {
-    
-          this.statusbar = statusbar;
-          initBoard();
+        this.statusbar = statusbar;
+        initBoard();
       }
     
       private void initBoard() {
-    
-          setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
-    
-          img = new Image[NUM_IMAGES];
-    
-          for (int i = 0; i < NUM_IMAGES; i++) {
-    
-              String path = "img/" + i + ".png";
-              img[i] = (new ImageIcon(path)).getImage();
-          }
-    
-          addMouseListener(new MinesAdapter());
-          newGame();
+        setPreferredSize(new Dimension(Minesweeper.Globals.width, Minesweeper.Globals.height));
+  
+        img = new Image[13];
+  
+        for (int i = 0; i < 13; i++) {
+          String path = "img/" + i + ".png";
+          img[i] = (new ImageIcon(path)).getImage();
+        }
+  
+        addMouseListener(new MinesAdapter());
+        newGame();
       }
-    
+
       private void newGame() {
-    
-          int cell;
-    
-          Random random = new Random();
-          inGame = true;
-          minesLeft = N_MINES;
-    
-          allCells = N_ROWS * N_COLS;
-          field = new int[allCells];
-    
-          for (int i = 0; i < allCells; i++) {
-    
-              field[i] = COVER_FOR_CELL;
-          }
-    
-          statusbar.setText(Integer.toString(minesLeft));
-    
-          int i = 0;
-    
-          while (i < N_MINES) {
-    
-              int position = (int) (allCells * random.nextDouble());
-    
-              if ((position < allCells)
-                      && (field[position] != COVERED_MINE_CELL)) {
-    
-                  int current_col = position % N_COLS;
-                  field[position] = COVERED_MINE_CELL;
-                  i++;
-    
-                  if (current_col > 0) {
-                      cell = position - 1 - N_COLS;
-                      if (cell >= 0) {
-                          if (field[cell] != COVERED_MINE_CELL) {
-                              field[cell] += 1;
-                          }
-                      }
-                      cell = position - 1;
-                      if (cell >= 0) {
-                          if (field[cell] != COVERED_MINE_CELL) {
-                              field[cell] += 1;
-                          }
-                      }
-    
-                      cell = position + N_COLS - 1;
-                      if (cell < allCells) {
-                          if (field[cell] != COVERED_MINE_CELL) {
-                              field[cell] += 1;
-                          }
-                      }
-                  }
-    
-                  cell = position - N_COLS;
-                  if (cell >= 0) {
-                      if (field[cell] != COVERED_MINE_CELL) {
-                          field[cell] += 1;
-                      }
-                  }
-    
-                  cell = position + N_COLS;
-                  if (cell < allCells) {
-                      if (field[cell] != COVERED_MINE_CELL) {
-                          field[cell] += 1;
-                      }
-                  }
-    
-                  if (current_col < (N_COLS - 1)) {
-                      cell = position - N_COLS + 1;
-                      if (cell >= 0) {
-                          if (field[cell] != COVERED_MINE_CELL) {
-                              field[cell] += 1;
-                          }
-                      }
-                      cell = position + N_COLS + 1;
-                      if (cell < allCells) {
-                          if (field[cell] != COVERED_MINE_CELL) {
-                              field[cell] += 1;
-                          }
-                      }
-                      cell = position + 1;
-                      if (cell < allCells) {
-                          if (field[cell] != COVERED_MINE_CELL) {
-                              field[cell] += 1;
-                          }
-                      }
-                  }
+        int cell;
+        int mines = Minesweeper.Globals.mines;
+        int cols = Minesweeper.Globals.cols;
+        int rows = Minesweeper.Globals.rows;
+  
+        Random random = new Random();
+        inGame = true;
+        minesLeft = mines;
+  
+        allCells = rows * cols;
+        field = new int[allCells];
+  
+        for (int i = 0; i < allCells; i++) {
+          field[i] = 10;
+        }
+  
+        statusbar.setText(Integer.toString(minesLeft));
+  
+        int i = 0;
+  
+        while (i < mines) {
+          int position = (int) (allCells * random.nextDouble());
+
+          if ((position < allCells) && (field[position] != 19)) {
+            int current_col = position % cols;
+            field[position] = 19;
+            i++;
+
+            if (current_col > 0) {
+              cell = position - 1 - cols;
+              if (cell >= 0) {
+                if (field[cell] != 19) {
+                  field[cell] += 1;
+                }
               }
+
+              cell = position - 1;
+              if (cell >= 0) {
+                if (field[cell] != 19) {
+                  field[cell] += 1;
+                }
+              }
+
+              cell = position + cols - 1;
+              if (cell < allCells) {
+                if (field[cell] != 19) {
+                  field[cell] += 1;
+                }
+              }
+            }
+
+            cell = position - cols;
+            if (cell >= 0) {
+              if (field[cell] != 19) {
+                field[cell] += 1;
+              }
+            }
+
+            cell = position + cols;
+            if (cell < allCells) {
+              if (field[cell] != 19) {
+                field[cell] += 1;
+              }
+            }
+
+            if (current_col < (cols - 1)) {
+              cell = position - cols + 1;
+              if (cell >= 0) {
+                if (field[cell] != 19) {
+                  field[cell] += 1;
+                }
+              }
+
+              cell = position + cols + 1;
+              if (cell < allCells) {
+                if (field[cell] != 19) {
+                  field[cell] += 1;
+                }
+              }
+
+              cell = position + 1;
+              if (cell < allCells) {
+                if (field[cell] != 19) {
+                  field[cell] += 1;
+                }
+              }
+            }
           }
+        }
       }
-    
-      private void find_empty_cells(int j) {
-    
-          int current_col = j % N_COLS;
-          int cell;
-    
-          if (current_col > 0) {
-              cell = j - N_COLS - 1;
-              if (cell >= 0) {
-                  if (field[cell] > MINE_CELL) {
-                      field[cell] -= COVER_FOR_CELL;
-                      if (field[cell] == EMPTY_CELL) {
-                          find_empty_cells(cell);
-                      }
-                  }
-              }
-    
-              cell = j - 1;
-              if (cell >= 0) {
-                  if (field[cell] > MINE_CELL) {
-                      field[cell] -= COVER_FOR_CELL;
-                      if (field[cell] == EMPTY_CELL) {
-                          find_empty_cells(cell);
-                      }
-                  }
-              }
-    
-              cell = j + N_COLS - 1;
-              if (cell < allCells) {
-                  if (field[cell] > MINE_CELL) {
-                      field[cell] -= COVER_FOR_CELL;
-                      if (field[cell] == EMPTY_CELL) {
-                          find_empty_cells(cell);
-                      }
-                  }
-              }
-          }
-    
-          cell = j - N_COLS;
+      
+      private void playExplosion() throws Exception { 
+        File file = new File("explosion.au");
+        Clip clip2 = AudioSystem.getClip();
+        AudioInputStream ais = AudioSystem.getAudioInputStream(file);
+
+        clip2.open(ais);
+        clip2.start();
+      }
+
+      private void findEmptyCells(int j) {
+        int cols = Minesweeper.Globals.cols;
+        int current_col = j % cols;
+        int cell;
+  
+        if (current_col > 0) {
+          cell = j - cols - 1;
           if (cell >= 0) {
-              if (field[cell] > MINE_CELL) {
-                  field[cell] -= COVER_FOR_CELL;
-                  if (field[cell] == EMPTY_CELL) {
-                      find_empty_cells(cell);
-                  }
+            if (field[cell] > 9) {
+              field[cell] -= 10;
+
+              if (field[cell] == 0) {
+                findEmptyCells(cell);
               }
+            }
           }
-    
-          cell = j + N_COLS;
+
+          cell = j - 1;
+          if (cell >= 0) {
+            if (field[cell] > 9) {
+              field[cell] -= 10;
+
+              if (field[cell] == 0) {
+                findEmptyCells(cell);
+              }
+            }
+          }
+
+          cell = j + cols - 1;
           if (cell < allCells) {
-              if (field[cell] > MINE_CELL) {
-                  field[cell] -= COVER_FOR_CELL;
-                  if (field[cell] == EMPTY_CELL) {
-                      find_empty_cells(cell);
-                  }
+            if (field[cell] > 9) {
+              field[cell] -= 10;
+
+              if (field[cell] == 0) {
+                findEmptyCells(cell);
               }
+            }
           }
-    
-          if (current_col < (N_COLS - 1)) {
-              cell = j - N_COLS + 1;
-              if (cell >= 0) {
-                  if (field[cell] > MINE_CELL) {
-                      field[cell] -= COVER_FOR_CELL;
-                      if (field[cell] == EMPTY_CELL) {
-                          find_empty_cells(cell);
-                      }
-                  }
-              }
-    
-              cell = j + N_COLS + 1;
-              if (cell < allCells) {
-                  if (field[cell] > MINE_CELL) {
-                      field[cell] -= COVER_FOR_CELL;
-                      if (field[cell] == EMPTY_CELL) {
-                          find_empty_cells(cell);
-                      }
-                  }
-              }
-    
-              cell = j + 1;
-              if (cell < allCells) {
-                  if (field[cell] > MINE_CELL) {
-                      field[cell] -= COVER_FOR_CELL;
-                      if (field[cell] == EMPTY_CELL) {
-                          find_empty_cells(cell);
-                      }
-                  }
-              }
+        }
+  
+        cell = j - cols;
+        if (cell >= 0) {
+          if (field[cell] > 9) {
+            field[cell] -= 10;
+
+            if (field[cell] == 0) {
+              findEmptyCells(cell);
+            }
           }
-    
+        }
+  
+        cell = j + cols;
+        if (cell < allCells) {
+          if (field[cell] > 9) {
+            field[cell] -= 10;
+
+            if (field[cell] == 0) {
+              findEmptyCells(cell);
+            }
+          }
+        }
+  
+        if (current_col < (cols - 1)) {
+          cell = j - cols + 1;
+          if (cell >= 0) {
+            if (field[cell] > 9) {
+              field[cell] -= 10;
+
+              if (field[cell] == 0) {
+                findEmptyCells(cell);
+              }
+            }
+          }
+
+          cell = j + cols + 1;
+          if (cell < allCells) {
+            if (field[cell] > 9) {
+              field[cell] -= 10;
+
+              if (field[cell] == 0) {
+                findEmptyCells(cell);
+              }
+            }
+          }
+
+          cell = j + 1;
+          if (cell < allCells) {
+            if (field[cell] > 9) {
+              field[cell] -= 10;
+
+              if (field[cell] == 0) {
+                findEmptyCells(cell);
+              }
+            }
+          }
+        }
       }
     
       @Override
       public void paintComponent(Graphics g) {
-    
-          int uncover = 0;
-    
-          for (int i = 0; i < N_ROWS; i++) {
-    
-              for (int j = 0; j < N_COLS; j++) {
-    
-                  int cell = field[(i * N_COLS) + j];
-    
-                  if (inGame && cell == MINE_CELL) {
-    
-                      inGame = false;
-                  }
-    
-                  if (!inGame) {
-    
-                      if (cell == COVERED_MINE_CELL) {
-                          cell = DRAW_MINE;
-                      } else if (cell == MARKED_MINE_CELL) {
-                          cell = DRAW_MARK;
-                      } else if (cell > COVERED_MINE_CELL) {
-                          cell = DRAW_WRONG_MARK;
-                      } else if (cell > MINE_CELL) {
-                          cell = DRAW_COVER;
-                      }
-    
-                  } else {
-    
-                      if (cell > COVERED_MINE_CELL) {
-                          cell = DRAW_MARK;
-                      } else if (cell > MINE_CELL) {
-                          cell = DRAW_COVER;
-                          uncover++;
-                      }
-                  }
-    
-                  g.drawImage(img[cell], (j * CELL_SIZE),
-                          (i * CELL_SIZE), this);
-              }
-          }
-    
-          if (uncover == 0 && inGame) {
-    
+        int uncover = 0;
+        int cols = Minesweeper.Globals.cols;
+        int rows = Minesweeper.Globals.rows;
+  
+        for (int i = 0; i < rows; i++) {
+          for (int j = 0; j < cols; j++) {
+            int cell = field[(i * cols) + j];
+
+            if (inGame && cell == 9) {
               inGame = false;
-              statusbar.setText("Game won");
-    
-          } else if (!inGame) {
-              statusbar.setText("Game lost");
+            }
+
+            if (!inGame) {
+              if (cell == 19) {
+                cell = 9;
+              } else if (cell == 29) {
+                cell = 11;
+              } else if (cell > 19) {
+                cell = 12;
+              } else if (cell > 9) {
+                cell = 10;
+              }
+            } else {
+              if (cell > 19) {
+                cell = 11;
+              } else if (cell > 9) {
+                cell = 10;
+                uncover++;
+              }
+            }
+
+            g.drawImage(img[cell], (j * 22), (i * 22), this);
           }
+        }
+  
+        if (uncover == 0 && inGame) {
+          inGame = false;
+          statusbar.setText("Game won");
+        } else if (!inGame) {
+          statusbar.setText("Game lost");
+        }
       }
     
       private class MinesAdapter extends MouseAdapter {
-    
-          @Override
-          public void mousePressed(MouseEvent e) {
-    
-              int x = e.getX();
-              int y = e.getY();
-    
-              int cCol = x / CELL_SIZE;
-              int cRow = y / CELL_SIZE;
-    
-              boolean doRepaint = false;
-    
-              if (!inGame) {
-    
-                  newGame();
-                  repaint();
-              }
-    
-              if ((x < N_COLS * CELL_SIZE) && (y < N_ROWS * CELL_SIZE)) {
-    
-                  if (e.getButton() == MouseEvent.BUTTON3) {
-    
-                      if (field[(cRow * N_COLS) + cCol] > MINE_CELL) {
-    
-                          doRepaint = true;
-    
-                          if (field[(cRow * N_COLS) + cCol] <= COVERED_MINE_CELL) {
-    
-                              if (minesLeft > 0) {
-                                  field[(cRow * N_COLS) + cCol] += MARK_FOR_CELL;
-                                  minesLeft--;
-                                  String msg = Integer.toString(minesLeft);
-                                  statusbar.setText(msg);
-                              } else {
-                                  statusbar.setText("No marks left");
-                              }
-                          } else {
-    
-                              field[(cRow * N_COLS) + cCol] -= MARK_FOR_CELL;
-                              minesLeft++;
-                              String msg = Integer.toString(minesLeft);
-                              statusbar.setText(msg);
-                          }
-                      }
-    
+        @Override
+        public void mousePressed(MouseEvent e) {
+          int x = e.getX();
+          int y = e.getY();
+
+          int cCol = x / 22;
+          int cRow = y / 22;
+
+          boolean doRepaint = false;
+
+          if (!inGame) {
+            setVisible(false);
+
+            int option = startGameDialog();
+
+            if (option == 3) {
+              Minesweeper.Globals.cols = 7;
+              Minesweeper.Globals.rows = 9;
+              Minesweeper.Globals.width = 7 * 22 + 1;
+              Minesweeper.Globals.height = 9 * 22 + 1;
+              Minesweeper.Globals.mines = 10;
+            } else if (option == 2) {
+              Minesweeper.Globals.cols = 13;
+              Minesweeper.Globals.rows = 18;
+              Minesweeper.Globals.width = 13 * 22 + 1;
+              Minesweeper.Globals.height = 18 * 22 + 1;
+              Minesweeper.Globals.mines = 35;
+            } else if (option == 1) {
+              Minesweeper.Globals.cols = 22;
+              Minesweeper.Globals.rows = 25;
+              Minesweeper.Globals.width = 22 * 22 + 1;
+              Minesweeper.Globals.height = 25 * 22 + 1;
+              Minesweeper.Globals.mines = 91;
+            } else {
+              System.exit(0);
+            }
+
+            EventQueue.invokeLater(() -> {
+              initUI();
+            });
+          }
+
+          if ((x < Minesweeper.Globals.cols * 22) && (y < Minesweeper.Globals.rows * 22)) {
+            if (e.getButton() == MouseEvent.BUTTON3) {
+              if (field[(cRow * Minesweeper.Globals.cols) + cCol] > 9) {
+                doRepaint = true;
+
+                if (field[(cRow * Minesweeper.Globals.cols) + cCol] <= 19) {
+                  if (minesLeft > 0) {
+                    field[(cRow * Minesweeper.Globals.cols) + cCol] += 10;
+                    minesLeft--;
+                    String msg = Integer.toString(minesLeft);
+                    statusbar.setText(msg);
                   } else {
-    
-                      if (field[(cRow * N_COLS) + cCol] > COVERED_MINE_CELL) {
-    
-                          return;
-                      }
-    
-                      if ((field[(cRow * N_COLS) + cCol] > MINE_CELL)
-                              && (field[(cRow * N_COLS) + cCol] < MARKED_MINE_CELL)) {
-    
-                          field[(cRow * N_COLS) + cCol] -= COVER_FOR_CELL;
-                          doRepaint = true;
-    
-                          if (field[(cRow * N_COLS) + cCol] == MINE_CELL) {
-                              inGame = false;
-                          }
-    
-                          if (field[(cRow * N_COLS) + cCol] == EMPTY_CELL) {
-                              find_empty_cells((cRow * N_COLS) + cCol);
-                          }
-                      }
+                    statusbar.setText("No marks left");
                   }
-    
-                  if (doRepaint) {
-                      repaint();
+                } else {
+                  field[(cRow * Minesweeper.Globals.cols) + cCol] -= 10;
+                  minesLeft++;
+                  String msg = Integer.toString(minesLeft);
+                  statusbar.setText(msg);
+                }
+              }
+            } else {
+              if (field[(cRow * Minesweeper.Globals.cols) + cCol] > 19) {
+                return;
+              }
+
+              if ((field[(cRow * Minesweeper.Globals.cols) + cCol] > 9)
+                  && (field[(cRow * Minesweeper.Globals.cols) + cCol] < 29)) {
+
+                field[(cRow * Minesweeper.Globals.cols) + cCol] -= 10;
+                doRepaint = true;
+
+                if (field[(cRow * Minesweeper.Globals.cols) + cCol] == 9) {
+                  try {
+                    playExplosion();
+                  } catch (Exception exception) {
+                    System.out.println(exception);
                   }
+                  
+                  inGame = false;
+                }
+
+                if (field[(cRow * Minesweeper.Globals.cols) + cCol] == 0) {
+                  findEmptyCells((cRow * Minesweeper.Globals.cols) + cCol);
+                }
+              }
+            }
+
+              if (doRepaint) {
+                repaint();
               }
           }
+        }
       }
     }
 
     public Minesweeper() {
-
-        initUI();
+      initUI();
     }
 
     private void initUI() {
+      statusbar = new JLabel("");
+      add(statusbar, BorderLayout.SOUTH);
 
-        statusbar = new JLabel("");
-        add(statusbar, BorderLayout.SOUTH);
+      add(new Board(statusbar));
 
-        add(new Board(statusbar));
+      setResizable(false);
+      pack();
 
-        setResizable(false);
-        pack();
+      setTitle("Minesweeper");
+      setLocationRelativeTo(null);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
 
-        setTitle("Minesweeper");
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public static Integer startGameDialog() {
+      Object[] options = {"Exit", "Expert", "Advanced", "Beginner"};
+  
+      int n = JOptionPane.showOptionDialog(
+        null,
+        "What level would you like to play?",
+        "Minesweeper",
+        JOptionPane.DEFAULT_OPTION,
+        JOptionPane.QUESTION_MESSAGE,
+        null,
+        options,
+        options[0]
+      );
+  
+      return n;
     }
 
     public static void main(String[] args) {
+      int option = startGameDialog();
 
-        EventQueue.invokeLater(() -> {
+      if (option == 3) {
+        Minesweeper.Globals.cols = 7;
+        Minesweeper.Globals.rows = 9;
+        Minesweeper.Globals.width = 7 * 22 + 1;
+        Minesweeper.Globals.height = 9 * 22 + 1;
+        Minesweeper.Globals.mines = 10;
+      } else if (option == 2) {
+        Minesweeper.Globals.cols = 13;
+        Minesweeper.Globals.rows = 18;
+        Minesweeper.Globals.width = 13 * 22 + 1;
+        Minesweeper.Globals.height = 18 * 22 + 1;
+        Minesweeper.Globals.mines = 35;
+      } else if (option == 1) {
+        Minesweeper.Globals.cols = 22;
+        Minesweeper.Globals.rows = 25;
+        Minesweeper.Globals.width = 22 * 22 + 1;
+        Minesweeper.Globals.height = 25 * 22 + 1;
+        Minesweeper.Globals.mines = 91;
+      } else {
+        System.exit(0);
+      }
 
-            Minesweeper ex = new Minesweeper();
-            ex.setVisible(true);
-        });
+      EventQueue.invokeLater(() -> {
+        Minesweeper m = new Minesweeper();
+        m.setVisible(true);
+      });
     }
 }
