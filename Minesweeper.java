@@ -14,6 +14,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.Timer;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 
@@ -314,7 +315,7 @@ public class Minesweeper extends JFrame {
           statusbar.setText("You won!");
         } else if (!in_game && winner) {
           statusbar.setText("You won!");
-        } else {
+        } else if (!in_game && !winner) {
           statusbar.setText("You lost...");
         }
       }
@@ -340,25 +341,26 @@ public class Minesweeper extends JFrame {
               Minesweeper.Globals.cols = 7;
               Minesweeper.Globals.rows = 9;
               Minesweeper.Globals.width = 7 * 22 + 1;
-              Minesweeper.Globals.height = 9 * 22 + 1;
+              Minesweeper.Globals.height = 9 * 22 + 16;
               Minesweeper.Globals.mines = 10;
             } else if (option == 2) {
               Minesweeper.Globals.cols = 13;
               Minesweeper.Globals.rows = 18;
               Minesweeper.Globals.width = 13 * 22 + 1;
-              Minesweeper.Globals.height = 18 * 22 + 1;
+              Minesweeper.Globals.height = 18 * 22 + 16;
               Minesweeper.Globals.mines = 35;
             } else if (option == 1) {
               Minesweeper.Globals.cols = 22;
               Minesweeper.Globals.rows = 25;
               Minesweeper.Globals.width = 22 * 22 + 1;
-              Minesweeper.Globals.height = 25 * 22 + 1;
+              Minesweeper.Globals.height = 25 * 22 + 16;
               Minesweeper.Globals.mines = 91;
             } else {
               System.exit(0);
             }
 
             EventQueue.invokeLater(() -> {
+              remove(statusbar);
               initUI();
             });
           }
@@ -425,9 +427,14 @@ public class Minesweeper extends JFrame {
       add(new Board(statusbar));
 
       new Timer(1000, new ActionListener() {
+        int counter = 0;
+        SimpleDateFormat df = new SimpleDateFormat("mm:ss");
+
         @Override
         public void actionPerformed(ActionEvent e) {
-          statusbar.setText(String.valueOf(System.nanoTime()));
+          counter += 1000;
+          df = new SimpleDateFormat("mm:ss");
+          statusbar.setText(df.format(counter));
         }
       }).start();
 
@@ -463,19 +470,19 @@ public class Minesweeper extends JFrame {
         Minesweeper.Globals.cols = 7;
         Minesweeper.Globals.rows = 9;
         Minesweeper.Globals.width = 7 * 22 + 1;
-        Minesweeper.Globals.height = 9 * 22 + 1;
+        Minesweeper.Globals.height = 9 * 22 + 16;
         Minesweeper.Globals.mines = 10;
       } else if (option == 2) {
         Minesweeper.Globals.cols = 13;
         Minesweeper.Globals.rows = 18;
         Minesweeper.Globals.width = 13 * 22 + 1;
-        Minesweeper.Globals.height = 18 * 22 + 1;
+        Minesweeper.Globals.height = 18 * 22 + 16;
         Minesweeper.Globals.mines = 35;
       } else if (option == 1) {
         Minesweeper.Globals.cols = 22;
         Minesweeper.Globals.rows = 25;
         Minesweeper.Globals.width = 22 * 22 + 1;
-        Minesweeper.Globals.height = 25 * 22 + 1;
+        Minesweeper.Globals.height = 25 * 22 + 16;
         Minesweeper.Globals.mines = 91;
       } else {
         System.exit(0);
