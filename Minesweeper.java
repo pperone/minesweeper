@@ -32,7 +32,6 @@ public class Minesweeper extends JFrame {
       public static int width;
       public static int height;
       public static int mines;
-      public static boolean winner;
       public static Timer timer;
     }
 
@@ -316,10 +315,7 @@ public class Minesweeper extends JFrame {
           in_game = false;
           Minesweeper.Globals.timer.stop();
           statusbar.setText("You won!");
-        } else if (!in_game && Minesweeper.Globals.winner) {
-          Minesweeper.Globals.timer.stop();
-          statusbar.setText("You suck!");
-        } else if (!in_game && !Minesweeper.Globals.winner) {
+        } else if (!in_game) {
           Minesweeper.Globals.timer.stop();
           statusbar.setText("You lost...");
         }
@@ -403,7 +399,6 @@ public class Minesweeper extends JFrame {
                   }
                   
                   in_game = false;
-                  Minesweeper.Globals.winner = true;
                 }
 
                 if (field[(cRow * Minesweeper.Globals.cols) + cCol] == EMPTY_BUTTON) {
