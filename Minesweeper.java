@@ -338,23 +338,11 @@ public class Minesweeper extends JFrame {
             int option = startGameDialog("Game over! Would you like to play again?");
 
             if (option == 3) {
-              Minesweeper.Globals.cols = 7;
-              Minesweeper.Globals.rows = 9;
-              Minesweeper.Globals.width = 7 * 22 + 1;
-              Minesweeper.Globals.height = 9 * 22 + 16;
-              Minesweeper.Globals.mines = 10;
+              makeBeginner();
             } else if (option == 2) {
-              Minesweeper.Globals.cols = 13;
-              Minesweeper.Globals.rows = 18;
-              Minesweeper.Globals.width = 13 * 22 + 1;
-              Minesweeper.Globals.height = 18 * 22 + 16;
-              Minesweeper.Globals.mines = 35;
+              makeAdvanced();
             } else if (option == 1) {
-              Minesweeper.Globals.cols = 22;
-              Minesweeper.Globals.rows = 25;
-              Minesweeper.Globals.width = 22 * 22 + 1;
-              Minesweeper.Globals.height = 25 * 22 + 16;
-              Minesweeper.Globals.mines = 91;
+              makeExpert();
             } else {
               System.exit(0);
             }
@@ -444,39 +432,6 @@ public class Minesweeper extends JFrame {
             finishBasedOnTime("expert");
           }
         }
-
-        public void finishBasedOnTime(String level) {
-          Minesweeper.Globals.timer.stop();
-          statusbar.setText("");
-    
-          int option = startGameDialog("Time is up for the " + level + " level! Would you like to play again?");
-    
-          if (option == 3) {
-            Minesweeper.Globals.cols = 7;
-            Minesweeper.Globals.rows = 9;
-            Minesweeper.Globals.width = 7 * 22 + 1;
-            Minesweeper.Globals.height = 9 * 22 + 16;
-            Minesweeper.Globals.mines = 10;
-          } else if (option == 2) {
-            Minesweeper.Globals.cols = 13;
-            Minesweeper.Globals.rows = 18;
-            Minesweeper.Globals.width = 13 * 22 + 1;
-            Minesweeper.Globals.height = 18 * 22 + 16;
-            Minesweeper.Globals.mines = 35;
-          } else if (option == 1) {
-            Minesweeper.Globals.cols = 22;
-            Minesweeper.Globals.rows = 25;
-            Minesweeper.Globals.width = 22 * 22 + 1;
-            Minesweeper.Globals.height = 25 * 22 + 16;
-            Minesweeper.Globals.mines = 91;
-          } else {
-            System.exit(0);
-          }
-    
-          EventQueue.invokeLater(() -> {
-            initUI();
-          });
-        }
       };
 
       Minesweeper.Globals.timer = new Timer(1000, count_up);
@@ -488,6 +443,51 @@ public class Minesweeper extends JFrame {
       setTitle("Minesweeper");
       setLocationRelativeTo(null);
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    private void finishBasedOnTime(String level) {
+      Minesweeper.Globals.timer.stop();
+      statusbar.setText("");
+
+      int option = startGameDialog("Time is up for the " + level + " level! Would you like to play again?");
+
+      if (option == 3) {
+        makeBeginner();
+      } else if (option == 2) {
+        makeAdvanced();
+      } else if (option == 1) {
+        makeExpert();
+      } else {
+        System.exit(0);
+      }
+
+      EventQueue.invokeLater(() -> {
+        initUI();
+      });
+    }
+
+    public static void makeBeginner() {
+      Minesweeper.Globals.cols = 7;
+      Minesweeper.Globals.rows = 9;
+      Minesweeper.Globals.width = 7 * 22 + 1;
+      Minesweeper.Globals.height = 9 * 22 + 16;
+      Minesweeper.Globals.mines = 10;
+    }
+
+    public static void makeAdvanced() {
+      Minesweeper.Globals.cols = 13;
+      Minesweeper.Globals.rows = 18;
+      Minesweeper.Globals.width = 13 * 22 + 1;
+      Minesweeper.Globals.height = 18 * 22 + 16;
+      Minesweeper.Globals.mines = 35;
+    }
+
+    public static void makeExpert() {
+      Minesweeper.Globals.cols = 22;
+      Minesweeper.Globals.rows = 25;
+      Minesweeper.Globals.width = 22 * 22 + 1;
+      Minesweeper.Globals.height = 25 * 22 + 16;
+      Minesweeper.Globals.mines = 91;
     }
 
     public static Integer startGameDialog(String message) {
@@ -511,23 +511,11 @@ public class Minesweeper extends JFrame {
       int option = startGameDialog("What level would you like to play?");
 
       if (option == 3) {
-        Minesweeper.Globals.cols = 7;
-        Minesweeper.Globals.rows = 9;
-        Minesweeper.Globals.width = 7 * 22 + 1;
-        Minesweeper.Globals.height = 9 * 22 + 16;
-        Minesweeper.Globals.mines = 10;
+        makeBeginner();
       } else if (option == 2) {
-        Minesweeper.Globals.cols = 13;
-        Minesweeper.Globals.rows = 18;
-        Minesweeper.Globals.width = 13 * 22 + 1;
-        Minesweeper.Globals.height = 18 * 22 + 16;
-        Minesweeper.Globals.mines = 35;
+        makeAdvanced();
       } else if (option == 1) {
-        Minesweeper.Globals.cols = 22;
-        Minesweeper.Globals.rows = 25;
-        Minesweeper.Globals.width = 22 * 22 + 1;
-        Minesweeper.Globals.height = 25 * 22 + 16;
-        Minesweeper.Globals.mines = 91;
+        makeExpert();
       } else {
         System.exit(0);
       }
