@@ -412,6 +412,17 @@ public class Minesweeper extends JFrame {
 
       add(new Board(statusbar));
 
+      setCounter();
+
+      setResizable(false);
+      pack();
+
+      setTitle("Minesweeper");
+      setLocationRelativeTo(null);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    private void setCounter() {
       ActionListener count_up = new ActionListener() {
         int counter = 0;
         int level = Minesweeper.Globals.cols;
@@ -436,17 +447,16 @@ public class Minesweeper extends JFrame {
 
       Minesweeper.Globals.timer = new Timer(1000, count_up);
       Minesweeper.Globals.timer.start();
+    }
 
-      setResizable(false);
-      pack();
-
-      setTitle("Minesweeper");
-      setLocationRelativeTo(null);
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private void resetUI() {
+      removeAll();
+      initUI();
     }
 
     private void finishBasedOnTime(String level) {
       Minesweeper.Globals.timer.stop();
+      setVisible(false);
       statusbar.setText("");
 
       int option = startGameDialog("Time is up for the " + level + " level! Would you like to play again?");
@@ -461,9 +471,7 @@ public class Minesweeper extends JFrame {
         System.exit(0);
       }
 
-      EventQueue.invokeLater(() -> {
-        initUI();
-      });
+      resetUI();
     }
 
     public static void makeBeginner() {
