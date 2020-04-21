@@ -40,13 +40,7 @@ public class Minesweeper extends JFrame {
     private class Board extends JPanel {
 
       private static final long serialVersionUID = 1L;
-    
-      private int[] field;
-      private boolean in_game;
-      private int mines_left;
-      private Image[] img;
-    
-      private int all_cells;
+
       private final JLabel statusbar;
 
       private final int BASE_BUTTON = 10;
@@ -56,6 +50,12 @@ public class Minesweeper extends JFrame {
       private final int WRONG_MARK_BUTTON = 12;
       private final int COVERED_MINE_BUTTON = 19;
       private final int MARKED_MINE_BUTTON = 29;
+
+      private int[] field;
+      private boolean in_game;
+      private int mines_left;
+      private Image[] images;  
+      private int all_cells;
     
       public Board(JLabel statusbar) {
         this.statusbar = statusbar;
@@ -65,11 +65,11 @@ public class Minesweeper extends JFrame {
       private void initBoard() {
         setPreferredSize(new Dimension(Minesweeper.Globals.width, Minesweeper.Globals.height));
   
-        img = new Image[13];
+        images = new Image[13];
   
         for (int i = 0; i < 13; i++) {
           String path = "img/" + i + ".png";
-          img[i] = (new ImageIcon(path)).getImage();
+          images[i] = (new ImageIcon(path)).getImage();
         }
   
         addMouseListener(new Mines());
@@ -306,7 +306,7 @@ public class Minesweeper extends JFrame {
               }
             }
 
-            g.drawImage(img[cell], (j * 22), (i * 22), this);
+            g.drawImage(images[cell], (j * 22), (i * 22), this);
           }
         }
   
@@ -450,13 +450,24 @@ public class Minesweeper extends JFrame {
     }
 
     private void resetUI() {
-      removeAll();
-      initUI();
+      statusbar = new JLabel("", JLabel.CENTER);
+      add(statusbar, BorderLayout.SOUTH);
+
+      add(new Board(statusbar));
+
+      setCounter();
+
+      setResizable(false);
+      pack();
+
+      setTitle("Minesweeper");
+      setLocationRelativeTo(null);
+      setVisible(true);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private void finishBasedOnTime(String level) {
       Minesweeper.Globals.timer.stop();
-      setVisible(false);
       statusbar.setText("");
 
       int option = startGameDialog("Time is up for the " + level + " level! Would you like to play again?");
