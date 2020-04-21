@@ -6,12 +6,11 @@ import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
+import java.util.Date;
 import java.io.*;
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
 import javax.swing.*;
 
 
@@ -38,12 +37,21 @@ public class Minesweeper extends JFrame {
       private static final long serialVersionUID = 1L;
     
       private int[] field;
-      private boolean inGame;
-      private int minesLeft;
+      private boolean in_game;
+      private boolean winner;
+      private int mines_left;
       private Image[] img;
     
-      private int allCells;
+      private int all_cells;
       private final JLabel statusbar;
+
+      private final int BASE_BUTTON = 10;
+      private final int EMPTY_BUTTON = 0;
+      private final int MINE_BUTTON = 9;
+      private final int MARK_BUTTON = 11;
+      private final int WRONG_MARK_BUTTON = 12;
+      private final int COVERED_MINE_BUTTON = 19;
+      private final int MARKED_MINE_BUTTON = 29;
     
       public Board(JLabel statusbar) {
         this.statusbar = statusbar;
@@ -60,57 +68,55 @@ public class Minesweeper extends JFrame {
           img[i] = (new ImageIcon(path)).getImage();
         }
   
-        addMouseListener(new MinesAdapter());
-        newGame();
+        addMouseListener(new Mines());
+        newGame(new Date());
       }
 
-      private void newGame() {
+      private void newGame(Date start) {
         int cell;
         int mines = Minesweeper.Globals.mines;
         int cols = Minesweeper.Globals.cols;
         int rows = Minesweeper.Globals.rows;
-  
+
         Random random = new Random();
-        inGame = true;
-        minesLeft = mines;
+        in_game = true;
+        mines_left = mines;
   
-        allCells = rows * cols;
-        field = new int[allCells];
+        all_cells = rows * cols;
+        field = new int[all_cells];
   
-        for (int i = 0; i < allCells; i++) {
-          field[i] = 10;
+        for (int i = 0; i < all_cells; i++) {
+          field[i] = BASE_BUTTON;
         }
-  
-        statusbar.setText(Integer.toString(minesLeft));
   
         int i = 0;
   
         while (i < mines) {
-          int position = (int) (allCells * random.nextDouble());
+          int position = (int) (all_cells * random.nextDouble());
 
-          if ((position < allCells) && (field[position] != 19)) {
+          if ((position < all_cells) && (field[position] != COVERED_MINE_BUTTON)) {
             int current_col = position % cols;
-            field[position] = 19;
+            field[position] = COVERED_MINE_BUTTON;
             i++;
 
             if (current_col > 0) {
               cell = position - 1 - cols;
               if (cell >= 0) {
-                if (field[cell] != 19) {
+                if (field[cell] != COVERED_MINE_BUTTON) {
                   field[cell] += 1;
                 }
               }
 
               cell = position - 1;
               if (cell >= 0) {
-                if (field[cell] != 19) {
+                if (field[cell] != COVERED_MINE_BUTTON) {
                   field[cell] += 1;
                 }
               }
 
               cell = position + cols - 1;
-              if (cell < allCells) {
-                if (field[cell] != 19) {
+              if (cell < all_cells) {
+                if (field[cell] != COVERED_MINE_BUTTON) {
                   field[cell] += 1;
                 }
               }
@@ -118,14 +124,14 @@ public class Minesweeper extends JFrame {
 
             cell = position - cols;
             if (cell >= 0) {
-              if (field[cell] != 19) {
+              if (field[cell] != COVERED_MINE_BUTTON) {
                 field[cell] += 1;
               }
             }
 
             cell = position + cols;
-            if (cell < allCells) {
-              if (field[cell] != 19) {
+            if (cell < all_cells) {
+              if (field[cell] != COVERED_MINE_BUTTON) {
                 field[cell] += 1;
               }
             }
@@ -133,21 +139,21 @@ public class Minesweeper extends JFrame {
             if (current_col < (cols - 1)) {
               cell = position - cols + 1;
               if (cell >= 0) {
-                if (field[cell] != 19) {
+                if (field[cell] != COVERED_MINE_BUTTON) {
                   field[cell] += 1;
                 }
               }
 
               cell = position + cols + 1;
-              if (cell < allCells) {
-                if (field[cell] != 19) {
+              if (cell < all_cells) {
+                if (field[cell] != COVERED_MINE_BUTTON) {
                   field[cell] += 1;
                 }
               }
 
               cell = position + 1;
-              if (cell < allCells) {
-                if (field[cell] != 19) {
+              if (cell < all_cells) {
+                if (field[cell] != COVERED_MINE_BUTTON) {
                   field[cell] += 1;
                 }
               }
@@ -173,10 +179,10 @@ public class Minesweeper extends JFrame {
         if (current_col > 0) {
           cell = j - cols - 1;
           if (cell >= 0) {
-            if (field[cell] > 9) {
-              field[cell] -= 10;
+            if (field[cell] > MINE_BUTTON) {
+              field[cell] -= BASE_BUTTON;
 
-              if (field[cell] == 0) {
+              if (field[cell] == EMPTY_BUTTON) {
                 findEmptyCells(cell);
               }
             }
@@ -184,21 +190,21 @@ public class Minesweeper extends JFrame {
 
           cell = j - 1;
           if (cell >= 0) {
-            if (field[cell] > 9) {
-              field[cell] -= 10;
+            if (field[cell] > MINE_BUTTON) {
+              field[cell] -= BASE_BUTTON;
 
-              if (field[cell] == 0) {
+              if (field[cell] == EMPTY_BUTTON) {
                 findEmptyCells(cell);
               }
             }
           }
 
           cell = j + cols - 1;
-          if (cell < allCells) {
-            if (field[cell] > 9) {
-              field[cell] -= 10;
+          if (cell < all_cells) {
+            if (field[cell] > MINE_BUTTON) {
+              field[cell] -= BASE_BUTTON;
 
-              if (field[cell] == 0) {
+              if (field[cell] == EMPTY_BUTTON) {
                 findEmptyCells(cell);
               }
             }
@@ -207,21 +213,21 @@ public class Minesweeper extends JFrame {
   
         cell = j - cols;
         if (cell >= 0) {
-          if (field[cell] > 9) {
-            field[cell] -= 10;
+          if (field[cell] > MINE_BUTTON) {
+            field[cell] -= BASE_BUTTON;
 
-            if (field[cell] == 0) {
+            if (field[cell] == EMPTY_BUTTON) {
               findEmptyCells(cell);
             }
           }
         }
   
         cell = j + cols;
-        if (cell < allCells) {
-          if (field[cell] > 9) {
-            field[cell] -= 10;
+        if (cell < all_cells) {
+          if (field[cell] > MINE_BUTTON) {
+            field[cell] -= BASE_BUTTON;
 
-            if (field[cell] == 0) {
+            if (field[cell] == EMPTY_BUTTON) {
               findEmptyCells(cell);
             }
           }
@@ -230,32 +236,32 @@ public class Minesweeper extends JFrame {
         if (current_col < (cols - 1)) {
           cell = j - cols + 1;
           if (cell >= 0) {
-            if (field[cell] > 9) {
-              field[cell] -= 10;
+            if (field[cell] > MINE_BUTTON) {
+              field[cell] -= BASE_BUTTON;
 
-              if (field[cell] == 0) {
+              if (field[cell] == EMPTY_BUTTON) {
                 findEmptyCells(cell);
               }
             }
           }
 
           cell = j + cols + 1;
-          if (cell < allCells) {
-            if (field[cell] > 9) {
-              field[cell] -= 10;
+          if (cell < all_cells) {
+            if (field[cell] > MINE_BUTTON) {
+              field[cell] -= BASE_BUTTON;
 
-              if (field[cell] == 0) {
+              if (field[cell] == EMPTY_BUTTON) {
                 findEmptyCells(cell);
               }
             }
           }
 
           cell = j + 1;
-          if (cell < allCells) {
-            if (field[cell] > 9) {
-              field[cell] -= 10;
+          if (cell < all_cells) {
+            if (field[cell] > MINE_BUTTON) {
+              field[cell] -= BASE_BUTTON;
 
-              if (field[cell] == 0) {
+              if (field[cell] == EMPTY_BUTTON) {
                 findEmptyCells(cell);
               }
             }
@@ -273,25 +279,25 @@ public class Minesweeper extends JFrame {
           for (int j = 0; j < cols; j++) {
             int cell = field[(i * cols) + j];
 
-            if (inGame && cell == 9) {
-              inGame = false;
+            if (in_game && cell == MINE_BUTTON) {
+              in_game = false;
             }
 
-            if (!inGame) {
-              if (cell == 19) {
-                cell = 9;
-              } else if (cell == 29) {
-                cell = 11;
-              } else if (cell > 19) {
-                cell = 12;
-              } else if (cell > 9) {
-                cell = 10;
+            if (!in_game) {
+              if (cell == COVERED_MINE_BUTTON) {
+                cell = MINE_BUTTON;
+              } else if (cell == MARKED_MINE_BUTTON) {
+                cell = MARK_BUTTON;
+              } else if (cell > COVERED_MINE_BUTTON) {
+                cell = WRONG_MARK_BUTTON;
+              } else if (cell > MINE_BUTTON) {
+                cell = BASE_BUTTON;
               }
             } else {
-              if (cell > 19) {
-                cell = 11;
-              } else if (cell > 9) {
-                cell = 10;
+              if (cell > COVERED_MINE_BUTTON) {
+                cell = MARK_BUTTON;
+              } else if (cell > MINE_BUTTON) {
+                cell = BASE_BUTTON;
                 uncover++;
               }
             }
@@ -300,15 +306,17 @@ public class Minesweeper extends JFrame {
           }
         }
   
-        if (uncover == 0 && inGame) {
-          inGame = false;
-          statusbar.setText("Game won");
-        } else if (!inGame) {
-          statusbar.setText("Game lost");
+        if (uncover == 0 && in_game) {
+          in_game = false;
+          statusbar.setText("You won!");
+        } else if (!in_game && winner) {
+          statusbar.setText("You won!");
+        } else {
+          statusbar.setText("You lost...");
         }
       }
     
-      private class MinesAdapter extends MouseAdapter {
+      private class Mines extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
           int x = e.getX();
@@ -319,8 +327,9 @@ public class Minesweeper extends JFrame {
 
           boolean doRepaint = false;
 
-          if (!inGame) {
+          if (!in_game) {
             setVisible(false);
+            statusbar.setText("");
 
             int option = startGameDialog();
 
@@ -353,47 +362,42 @@ public class Minesweeper extends JFrame {
 
           if ((x < Minesweeper.Globals.cols * 22) && (y < Minesweeper.Globals.rows * 22)) {
             if (e.getButton() == MouseEvent.BUTTON3) {
-              if (field[(cRow * Minesweeper.Globals.cols) + cCol] > 9) {
+              if (field[(cRow * Minesweeper.Globals.cols) + cCol] > MINE_BUTTON) {
                 doRepaint = true;
 
-                if (field[(cRow * Minesweeper.Globals.cols) + cCol] <= 19) {
-                  if (minesLeft > 0) {
-                    field[(cRow * Minesweeper.Globals.cols) + cCol] += 10;
-                    minesLeft--;
-                    String msg = Integer.toString(minesLeft);
-                    statusbar.setText(msg);
-                  } else {
-                    statusbar.setText("No marks left");
+                if (field[(cRow * Minesweeper.Globals.cols) + cCol] <= COVERED_MINE_BUTTON) {
+                  if (mines_left > 0) {
+                    field[(cRow * Minesweeper.Globals.cols) + cCol] += BASE_BUTTON;
+                    mines_left--;
                   }
                 } else {
-                  field[(cRow * Minesweeper.Globals.cols) + cCol] -= 10;
-                  minesLeft++;
-                  String msg = Integer.toString(minesLeft);
-                  statusbar.setText(msg);
+                  field[(cRow * Minesweeper.Globals.cols) + cCol] -= BASE_BUTTON;
+                  mines_left++;
                 }
               }
             } else {
-              if (field[(cRow * Minesweeper.Globals.cols) + cCol] > 19) {
+              if (field[(cRow * Minesweeper.Globals.cols) + cCol] > COVERED_MINE_BUTTON) {
                 return;
               }
 
-              if ((field[(cRow * Minesweeper.Globals.cols) + cCol] > 9)
-                  && (field[(cRow * Minesweeper.Globals.cols) + cCol] < 29)) {
+              if ((field[(cRow * Minesweeper.Globals.cols) + cCol] > MINE_BUTTON)
+                  && (field[(cRow * Minesweeper.Globals.cols) + cCol] < MARKED_MINE_BUTTON)) {
 
-                field[(cRow * Minesweeper.Globals.cols) + cCol] -= 10;
+                field[(cRow * Minesweeper.Globals.cols) + cCol] -= BASE_BUTTON;
                 doRepaint = true;
 
-                if (field[(cRow * Minesweeper.Globals.cols) + cCol] == 9) {
+                if (field[(cRow * Minesweeper.Globals.cols) + cCol] == MINE_BUTTON) {
                   try {
                     playExplosion();
                   } catch (Exception exception) {
                     System.out.println(exception);
                   }
                   
-                  inGame = false;
+                  in_game = false;
+                  winner = true;
                 }
 
-                if (field[(cRow * Minesweeper.Globals.cols) + cCol] == 0) {
+                if (field[(cRow * Minesweeper.Globals.cols) + cCol] == EMPTY_BUTTON) {
                   findEmptyCells((cRow * Minesweeper.Globals.cols) + cCol);
                 }
               }
@@ -412,7 +416,7 @@ public class Minesweeper extends JFrame {
     }
 
     private void initUI() {
-      statusbar = new JLabel("");
+      statusbar = new JLabel("", JLabel.CENTER);
       add(statusbar, BorderLayout.SOUTH);
 
       add(new Board(statusbar));
