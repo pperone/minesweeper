@@ -35,13 +35,13 @@ public class Minesweeper extends JFrame {
     }
 
     private static final long serialVersionUID = 1L;
-    private JLabel statusbar;
+    private JLabel time_label;
 
     private class Board extends JPanel {
 
       private static final long serialVersionUID = 1L;
 
-      private final JLabel statusbar;
+      private final JLabel time_label;
 
       private final int BASE_BUTTON = 10;
       private final int EMPTY_BUTTON = 0;
@@ -57,8 +57,8 @@ public class Minesweeper extends JFrame {
       private Image[] images;  
       private int all_cells;
     
-      public Board(JLabel statusbar) {
-        this.statusbar = statusbar;
+      public Board(JLabel time_label) {
+        this.time_label = time_label;
         initBoard();
       }
     
@@ -313,10 +313,10 @@ public class Minesweeper extends JFrame {
         if (uncover == 0 && in_game) {
           in_game = false;
           Minesweeper.Globals.timer.stop();
-          statusbar.setText("You won!");
+          time_label.setText("You won!");
         } else if (!in_game) {
           Minesweeper.Globals.timer.stop();
-          statusbar.setText("You lost...");
+          time_label.setText("You lost...");
         }
       }
     
@@ -333,7 +333,7 @@ public class Minesweeper extends JFrame {
 
           if (!in_game) {
             setVisible(false);
-            statusbar.setText("");
+            time_label.setText("");
 
             int option = startGameDialog("Game over! Would you like to play again?");
 
@@ -407,10 +407,10 @@ public class Minesweeper extends JFrame {
     }
 
     private void initUI() {
-      statusbar = new JLabel("", JLabel.CENTER);
-      add(statusbar, BorderLayout.SOUTH);
+      time_label = new JLabel("", JLabel.CENTER);
+      add(time_label, BorderLayout.SOUTH);
 
-      add(new Board(statusbar));
+      add(new Board(time_label));
 
       setCounter();
 
@@ -433,7 +433,7 @@ public class Minesweeper extends JFrame {
           counter += 1000;
           df = new SimpleDateFormat("mm:ss");
 
-          statusbar.setText(df.format(counter));
+          time_label.setText(df.format(counter));
 
           if (counter >= 60000 && level == 7) {
             Runtime run = Runtime.getRuntime();
