@@ -436,11 +436,47 @@ public class Minesweeper extends JFrame {
           statusbar.setText(df.format(counter));
 
           if (counter >= 60000 && level == 7) {
-            finishBasedOnTime("beginner");
+            Runtime run = Runtime.getRuntime();
+            int response = endTimeDialog("beginner");
+
+            if (response == 1) {
+              try {
+                run.exec("java Minesweeper"); 
+              } catch (IOException exception) {
+                System.out.println("Could not load new game: " + exception);
+              }
+              System.exit(0);
+            } else {
+              System.exit(0);
+            }
           } else if (counter >= 180000 && level == 13) {
-            finishBasedOnTime("advanced");
+            Runtime run = Runtime.getRuntime();
+            int response = endTimeDialog("advanced");
+
+            if (response == 1) {
+              try {
+                run.exec("java Minesweeper"); 
+              } catch (IOException exception) {
+                System.out.println("Could not load new game: " + exception);
+              }
+              System.exit(0);
+            } else {
+              System.exit(0);
+            }
           } else if (counter >= 600000 && level == 22) {
-            finishBasedOnTime("expert");
+            Runtime run = Runtime.getRuntime();
+            int response = endTimeDialog("expert");
+
+            if (response == 1) {
+              try {
+                run.exec("java Minesweeper"); 
+              } catch (IOException exception) {
+                System.out.println("Could not load new game: " + exception);
+              }
+              System.exit(0);
+            } else {
+              System.exit(0);
+            }
           }
         }
       };
@@ -449,40 +485,22 @@ public class Minesweeper extends JFrame {
       Minesweeper.Globals.timer.start();
     }
 
-    private void resetUI() {
-      statusbar = new JLabel("", JLabel.CENTER);
-      add(statusbar, BorderLayout.SOUTH);
-
-      add(new Board(statusbar));
-
-      setCounter();
-
-      setResizable(false);
-      pack();
-
-      setTitle("Minesweeper");
-      setLocationRelativeTo(null);
-      setVisible(true);
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
-
-    private void finishBasedOnTime(String level) {
-      Minesweeper.Globals.timer.stop();
-      statusbar.setText("");
-
-      int option = startGameDialog("Time is up for the " + level + " level! Would you like to play again?");
-
-      if (option == 3) {
-        makeBeginner();
-      } else if (option == 2) {
-        makeAdvanced();
-      } else if (option == 1) {
-        makeExpert();
-      } else {
-        System.exit(0);
-      }
-
-      resetUI();
+    public static Integer endTimeDialog(String level) {
+      Object[] options = {"Exit", "New game"};
+      String message = "Time up for " + level + " level!";
+  
+      int n = JOptionPane.showOptionDialog(
+        null,
+        message,
+        "Game over",
+        JOptionPane.DEFAULT_OPTION,
+        JOptionPane.QUESTION_MESSAGE,
+        null,
+        options,
+        options[0]
+      );
+  
+      return n;
     }
 
     public static void makeBeginner() {
