@@ -3,6 +3,7 @@ import java.awt.EventQueue;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -31,6 +32,8 @@ public class Minesweeper extends JFrame {
       public static int width;
       public static int height;
       public static int mines;
+      public static boolean winner;
+      public static Timer timer;
     }
 
     private static final long serialVersionUID = 1L;
@@ -42,7 +45,6 @@ public class Minesweeper extends JFrame {
     
       private int[] field;
       private boolean in_game;
-      private boolean winner;
       private int mines_left;
       private Image[] img;
     
@@ -312,10 +314,13 @@ public class Minesweeper extends JFrame {
   
         if (uncover == 0 && in_game) {
           in_game = false;
+          Minesweeper.Globals.timer.stop();
           statusbar.setText("You won!");
-        } else if (!in_game && winner) {
-          statusbar.setText("You won!");
-        } else if (!in_game && !winner) {
+        } else if (!in_game && Minesweeper.Globals.winner) {
+          Minesweeper.Globals.timer.stop();
+          statusbar.setText("You suck!");
+        } else if (!in_game && !Minesweeper.Globals.winner) {
+          Minesweeper.Globals.timer.stop();
           statusbar.setText("You lost...");
         }
       }
@@ -360,7 +365,6 @@ public class Minesweeper extends JFrame {
             }
 
             EventQueue.invokeLater(() -> {
-              remove(statusbar);
               initUI();
             });
           }
@@ -399,7 +403,7 @@ public class Minesweeper extends JFrame {
                   }
                   
                   in_game = false;
-                  winner = true;
+                  Minesweeper.Globals.winner = true;
                 }
 
                 if (field[(cRow * Minesweeper.Globals.cols) + cCol] == EMPTY_BUTTON) {
@@ -426,7 +430,7 @@ public class Minesweeper extends JFrame {
 
       add(new Board(statusbar));
 
-      new Timer(1000, new ActionListener() {
+      ActionListener count_up = new ActionListener() {
         int counter = 0;
         SimpleDateFormat df = new SimpleDateFormat("mm:ss");
 
@@ -436,7 +440,10 @@ public class Minesweeper extends JFrame {
           df = new SimpleDateFormat("mm:ss");
           statusbar.setText(df.format(counter));
         }
-      }).start();
+      };
+
+      Minesweeper.Globals.timer = new Timer(1000, count_up);
+      Minesweeper.Globals.timer.start();
 
       setResizable(false);
       pack();
