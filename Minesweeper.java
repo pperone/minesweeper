@@ -37,7 +37,7 @@ public class Minesweeper extends JFrame {
     private static final long serialVersionUID = 1L;
     private JLabel time_label;
 
-    private class Board extends JPanel {
+    private class Field extends JPanel {
 
       private static final long serialVersionUID = 1L;
 
@@ -57,12 +57,12 @@ public class Minesweeper extends JFrame {
       private Image[] images;  
       private int all_cells;
     
-      public Board(JLabel time_label) {
+      public Field(JLabel time_label) {
         this.time_label = time_label;
-        initBoard();
+        newField();
       }
     
-      private void initBoard() {
+      private void newField() {
         setPreferredSize(new Dimension(Minesweeper.Globals.width, Minesweeper.Globals.height));
   
         images = new Image[13];
@@ -410,7 +410,7 @@ public class Minesweeper extends JFrame {
       time_label = new JLabel("", JLabel.CENTER);
       add(time_label, BorderLayout.SOUTH);
 
-      add(new Board(time_label));
+      add(new Field(time_label));
 
       setCounter();
 
